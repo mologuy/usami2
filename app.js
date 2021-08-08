@@ -1,5 +1,8 @@
 const Discord = require("discord.js");
 
+const dadbot = require("./misc/dadbot.js");
+const sixtynine = require("./misc/sixtynine.js");
+
 const OPTIONS = require("./options.json");
 
 const client = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES] })
@@ -7,7 +10,7 @@ const client = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS, Disc
 let MAIN_GUILD;
 client.once("ready", async ()=>{
     console.log("Logged in as", client.user.tag);
-	MAIN_GUILD = await client.guilds.cache.get(OPTIONS.main_guild_id);
+	MAIN_GUILD = client.guilds.cache.get(OPTIONS.main_guild_id);
 
 	const pingdata = {
 		name: 'ping',
@@ -38,7 +41,8 @@ client.once("ready", async ()=>{
 });
 
 client.on("messageCreate", async (msg)=>{
-	console.log(msg);
+	dadbot.run(msg);
+	sixtynine.run(msg);
 });
 
 client.on("interactionCreate", async (interaction)=>{
