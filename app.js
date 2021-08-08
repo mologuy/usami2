@@ -1,5 +1,8 @@
 const Discord = require("discord.js");
 
+const ping = require("./commands/ping.js");
+const addone = require("./commands/addone.js");
+
 const dadbot = require("./misc/dadbot.js");
 const sixtynine = require("./misc/sixtynine.js");
 
@@ -12,28 +15,7 @@ client.once("ready", async ()=>{
     console.log("Logged in as", client.user.tag);
 	MAIN_GUILD = client.guilds.cache.get(OPTIONS.main_guild_id);
 
-	const pingdata = {
-		name: 'ping',
-		description: 'Replies with Pong!',
-	};
-
-	const addonedata = {
-		name: "addone",
-		description: "adds one to an integer",
-		options: [{
-			name: "number",
-			type: "INTEGER",
-			required: true,
-			description: "the number to add one to"
-		}]
-	}
-
-	const commands = [pingdata, addonedata];
-
-	//await client.application?.commands.create(pingdata);
-
-	//await MAIN_GUILD.commands.create(pingdata);
-	//await MAIN_GUILD.commands.create(pongdata);
+	const commands = [ping.data, addone.data];
 
 	MAIN_GUILD.commands.set(commands);
 
@@ -46,19 +28,14 @@ client.on("messageCreate", async (msg)=>{
 });
 
 client.on("interactionCreate", async (interaction)=>{
-	if (!interaction.isCommand()) return;
+	if (!interaction.isCommand()) {return;}
 
 	switch (interaction.commandName) {
 		case "ping":
-			interaction.reply("Pong!");
-			break;
-		case "pong":
-			interaction.reply("Ping!");
+			ping.run(interaction);
 			break;
 		case "addone":
-			var num = interaction.options.getInteger("number");
-			num++;
-			interaction.reply(num.toString());
+			addone.run(interaction);
 			break;
 		default:
 			interaction.reply(`Unknown command: \`${interaction.commandName}\``);
