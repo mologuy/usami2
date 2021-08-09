@@ -1,7 +1,6 @@
 const Discord = require("discord.js");
-
-const ping = require("./commands/ping.js");
-const addone = require("./commands/addone.js");
+const fs = require("fs/promises");
+const path = require("path");
 
 const dadbot = require("./misc/dadbot.js");
 const sixtynine = require("./misc/sixtynine.js");
@@ -11,35 +10,52 @@ const OPTIONS = require("./options.json");
 const client = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES] })
 
 let MAIN_GUILD;
+var COMMANDS = [];
 client.once("ready", async ()=>{
-    console.log("Logged in as", client.user.tag);
-	MAIN_GUILD = client.guilds.cache.get(OPTIONS.main_guild_id);
+	try {
+		console.log("Logged in as", client.user.tag);
+		MAIN_GUILD = client.guilds.cache.get(OPTIONS.main_guild_id);
 
-	const commands = [ping.data, addone.data];
+		const commFiles = await fs.readdir("./commands");
 
-	MAIN_GUILD.commands.set(commands);
+		for (const file of commFiles) {
+			const module = require(path.join(__dirname, "commands", file));
+			COMMANDS.push(module);
+		}
 
-	console.log(commands);
+		await MAIN_GUILD.commands.set(COMMANDS.map((command) => command.data ));
+
+		console.log(COMMANDS);
+	}
+	catch(e) {
+		console.log(e);
+	}
 });
 
 client.on("messageCreate", async (msg)=>{
-	dadbot.run(msg);
-	sixtynine.run(msg);
+	try {
+		await dadbot.run(msg);
+		await sixtynine.run(msg);
+	}
+	catch (e) {
+		console.log(e);
+	}
 });
 
 client.on("interactionCreate", async (interaction)=>{
 	if (!interaction.isCommand()) {return;}
 
-	switch (interaction.commandName) {
-		case "ping":
-			ping.run(interaction);
-			break;
-		case "addone":
-			addone.run(interaction);
-			break;
-		default:
-			interaction.reply(`Unknown command: \`${interaction.commandName}\``);
-			break;
+	try {
+		const commMatch = COMMANDS.find((command)=> command.data.name == interaction.commandName );
+		if (commMatch) {
+			await commMatch.run(interaction);
+		}
+		else {
+			await interaction.reply(`Unknown command: \`${interaction.commandName}\``);
+		}
+	}
+	catch(e) {
+		console.log(e);
 	}
 });
 
