@@ -2,10 +2,6 @@ const Discord = require("discord.js");
 const fs = require("fs/promises");
 const path = require("path");
 
-const dadbot = require("./misc/dadbot.js");
-const sixtynine = require("./misc/sixtynine.js");
-const spoilerimage = require("./misc/spoilerimage.js");
-
 const OPTIONS = require("./options.json");
 
 const client = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES] })
