@@ -27,12 +27,12 @@ client.once("ready", async ()=>{
 });
 
 client.on("messageCreate", async (msg)=>{
-	if (msg.author.bot) {return}
-	if (msg.webhookId) {return}
+	if (msg.author.bot) {return;}
+	if (msg.webhookId) {return;}
 
 	try {
 		for (const misc of MISCS) {
-			await misc.run(msg);
+			misc.run(msg);
 		}
 	}
 	catch (e) {
