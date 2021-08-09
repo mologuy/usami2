@@ -5,6 +5,7 @@
   "main": "app.js",
   "scripts": {
     "test": "node app.js",
+    "postinstall": "node bin/post-install.js",
     "dev": "nodemon app.js"
   },
   "repository": {
@@ -19,6 +20,9 @@
   "homepage": "https://github.com/mologuy/usami2#readme",
   "dependencies": {
     "discord.js": "^13.0.1",
-    "nodemon": "^2.0.12"
+    "fs": "^0.0.1-security",
+    "nodemon": "^2.0.12",
+    "path": "^0.12.7",
+    "pm2": "^5.1.0"
   }
 }

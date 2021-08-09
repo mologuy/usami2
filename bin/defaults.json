@@ -1,0 +1,6 @@
+{
+    "token": "123456abcdef",
+    "version": "2.0",
+    "main_guild_id": "123456789",
+    "options_filename": "options.json"
+}
