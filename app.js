@@ -4,6 +4,7 @@ const path = require("path");
 
 const dadbot = require("./misc/dadbot.js");
 const sixtynine = require("./misc/sixtynine.js");
+const spoilerimage = require("./misc/spoilerimage.js");
 
 const OPTIONS = require("./options.json");
 
@@ -11,21 +12,18 @@ const client = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS, Disc
 
 let MAIN_GUILD;
 var COMMANDS = [];
+var MISCS = [];
+
 client.once("ready", async ()=>{
 	try {
 		console.log("Logged in as", client.user.tag);
+		await client.user.setActivity(`Love, love!`);
+
 		MAIN_GUILD = client.guilds.cache.get(OPTIONS.main_guild_id);
-
-		const commFiles = await fs.readdir("./commands");
-
-		for (const file of commFiles) {
-			const module = require(path.join(__dirname, "commands", file));
-			COMMANDS.push(module);
-		}
 
 		await MAIN_GUILD.commands.set(COMMANDS.map((command) => command.data ));
 
-		console.log(COMMANDS);
+		//console.log(await MAIN_GUILD.commands.fetch());
 	}
 	catch(e) {
 		console.log(e);
@@ -33,9 +31,13 @@ client.once("ready", async ()=>{
 });
 
 client.on("messageCreate", async (msg)=>{
+	if (msg.author.bot) {return}
+	if (msg.webhookId) {return}
+
 	try {
-		await dadbot.run(msg);
-		await sixtynine.run(msg);
+		for (const misc of MISCS) {
+			await misc.run(msg);
+		}
 	}
 	catch (e) {
 		console.log(e);
@@ -59,4 +61,21 @@ client.on("interactionCreate", async (interaction)=>{
 	}
 });
 
-client.login(OPTIONS.token);
+//main function
+(async function(){
+	const commFiles = await fs.readdir("./commands");
+
+	for (const file of commFiles) {
+		const module = require(path.join(__dirname, "commands", file));
+		COMMANDS.push(module);
+	}
+
+	const miscFiles = await fs.readdir("./misc");
+
+	for (const file of miscFiles) {
+		const module = require(path.join(__dirname, "misc", file));
+		MISCS.push(module);
+	}
+
+	client.login(OPTIONS.token);
+})();
