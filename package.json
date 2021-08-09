@@ -6,7 +6,10 @@
   "scripts": {
     "test": "node app.js",
     "postinstall": "node bin/post-install.js",
-    "dev": "nodemon app.js"
+    "dev": "nodemon app.js",
+    "start": "npm install && pm2 start app.js --name \"usami2\"",
+    "stop": "pm2 stop usami2",
+    "restart": "npm install && pm2 restart usami2"
   },
   "repository": {
     "type": "git",
