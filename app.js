@@ -62,16 +62,21 @@ client.on("interactionCreate", async (interaction)=>{
 	const commFiles = await fs.readdir("./commands");
 
 	for (const file of commFiles) {
-		const module = require(path.join(__dirname, "commands", file));
-		COMMANDS.push(module);
+		if (file.match(/\.js$/i)) {
+			const module = require(path.join(__dirname, "commands", file));
+			COMMANDS.push(module);
+		}
 	}
 
 	const miscFiles = await fs.readdir("./misc");
 
 	for (const file of miscFiles) {
-		const module = require(path.join(__dirname, "misc", file));
-		MISCS.push(module);
+		if (file.match(/\.js$/i)) {
+			const module = require(path.join(__dirname, "misc", file));
+			MISCS.push(module);
+		}
 	}
 
 	client.login(OPTIONS.token);
+	
 })();
