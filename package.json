@@ -1,12 +1,12 @@
 {
   "name": "usami",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Usami 2.0",
   "main": "app.js",
   "scripts": {
     "test": "node app.js",
     "postinstall": "node bin/post-install.js",
-    "dev": "nodemon app.js",
+    "dev": "npm i && nodemon app.js",
     "start": "npm install && pm2 start app.js --name \"usami2\"",
     "stop": "pm2 stop usami2",
     "restart": "npm install && pm2 restart usami2"
@@ -24,6 +24,7 @@
   "dependencies": {
     "discord.js": "^13.0.1",
     "fs": "^0.0.1-security",
+    "jimp": "^0.16.1",
     "nodemon": "^2.0.12",
     "path": "^0.12.7",
     "pm2": "^5.1.0"

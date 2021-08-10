@@ -27,12 +27,12 @@ client.once("ready", async ()=>{
 });
 
 client.on("messageCreate", async (msg)=>{
-	if (msg.author.bot) {return}
-	if (msg.webhookId) {return}
+	if (msg.author.bot) {return;}
+	if (msg.webhookId) {return;}
 
 	try {
 		for (const misc of MISCS) {
-			await misc.run(msg);
+			misc.run(msg);
 		}
 	}
 	catch (e) {
@@ -62,16 +62,21 @@ client.on("interactionCreate", async (interaction)=>{
 	const commFiles = await fs.readdir("./commands");
 
 	for (const file of commFiles) {
-		const module = require(path.join(__dirname, "commands", file));
-		COMMANDS.push(module);
+		if (file.match(/\.js$/i)) {
+			const module = require(path.join(__dirname, "commands", file));
+			COMMANDS.push(module);
+		}
 	}
 
 	const miscFiles = await fs.readdir("./misc");
 
 	for (const file of miscFiles) {
-		const module = require(path.join(__dirname, "misc", file));
-		MISCS.push(module);
+		if (file.match(/\.js$/i)) {
+			const module = require(path.join(__dirname, "misc", file));
+			MISCS.push(module);
+		}
 	}
 
 	client.login(OPTIONS.token);
+	
 })();
