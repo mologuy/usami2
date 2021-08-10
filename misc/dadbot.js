@@ -2,9 +2,7 @@ const Jimp = require("jimp");
 
 async function dad(msg) {
     const dadmatch = msg.content.match(/^(i\W*m|i\s+am)\s+(.*)/i);
-    if (!dadmatch) {
-        return;
-    }
+    if (!dadmatch) {return;}
     
     const name = dadmatch[2];
 
