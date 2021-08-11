@@ -11,7 +11,7 @@ async function dad(msg) {
     const avatarImg = await Jimp.read(avatarURL);
     const pipeImg = await Jimp.read("./bin/pipe.png");
 
-    avatarImg.composite(pipeImg, 0, 0);
+    avatarImg.resize(256,256).composite(pipeImg, 0, 0);
 
     const image64 = await avatarImg.getBase64Async(Jimp.MIME_PNG);
 
