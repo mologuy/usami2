@@ -6,7 +6,6 @@ const OPTIONS = require("./options.json");
 
 const client = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES] })
 
-let MAIN_GUILD;
 var COMMANDS = [];
 var MISCS = [];
 
@@ -15,11 +14,7 @@ client.once("ready", async ()=>{
 		console.log("Logged in as", client.user.tag);
 		await client.user.setActivity(`Love, love!`);
 
-		MAIN_GUILD = client.guilds.cache.get(OPTIONS.main_guild_id);
-
-		await MAIN_GUILD.commands.set(COMMANDS.map((command) => command.data ));
-
-		//console.log(await MAIN_GUILD.commands.fetch());
+		await client.guilds.cache.get(OPTIONS.main_guild_id).commands.set(COMMANDS.map((command) => command.data ));
 	}
 	catch(e) {
 		console.log(e);
