@@ -6,15 +6,13 @@ const OPTIONS = require("./options.json");
 
 const client = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES] })
 
-var COMMANDS = [];
-var MISCS = [];
-
 client.once("ready", async ()=>{
 	try {
 		console.log("Logged in as", client.user.tag);
-		await client.user.setActivity(`Love, love!`);
+		client.user.setActivity(`Love, love!`);
 
-		await client.guilds.cache.get(OPTIONS.main_guild_id).commands.set(COMMANDS.map((command) => command.data ));
+		const commandsData = Object.values(COMMANDS).map((module) => module.data);
+		await client.guilds.cache.get(OPTIONS.main_guild_id).commands.set(commandsData);
 	}
 	catch(e) {
 		console.log(e);
@@ -39,9 +37,8 @@ client.on("interactionCreate", async (interaction)=>{
 	if (!interaction.isCommand()) {return;}
 
 	try {
-		const commMatch = COMMANDS.find((command)=> command.data.name == interaction.commandName );
-		if (commMatch) {
-			await commMatch.run(interaction);
+		if (COMMANDS[interaction.commandName]) {
+			await COMMANDS[interaction.commandName].run(interaction);
 		}
 		else {
 			await interaction.reply(`Unknown command: \`${interaction.commandName}\``);
@@ -52,6 +49,9 @@ client.on("interactionCreate", async (interaction)=>{
 	}
 });
 
+var COMMANDS = {};
+var MISCS = [];
+
 //main function
 (async function(){
 	const commFiles = await fs.readdir("./commands");
@@ -59,7 +59,12 @@ client.on("interactionCreate", async (interaction)=>{
 	for (const file of commFiles) {
 		if (file.match(/\.js$/i)) {
 			const module = require(path.join(__dirname, "commands", file));
-			COMMANDS.push(module);
+			if (COMMANDS[module.data.name]) {
+				throw new Error("Repeated command name!");
+			}
+			else {
+				COMMANDS[module.data.name] = module;
+			}
 		}
 	}
 
