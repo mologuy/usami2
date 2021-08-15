@@ -4,8 +4,6 @@ async function sixnine(msg) {
 
     if (!content.match(/69/i)) { return; }
 
-    //console.log("69 match:", content);
-
     await msg.reply({ content: "Nice", allowedMentions: { repliedUser: false }});
 }
 
