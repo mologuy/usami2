@@ -1,5 +1,5 @@
 async function sixnine(msg) {
-    var content = msg.content.replace(/<\S*\d{18,}>/i," "); //Remove mentions
+    var content = msg.content.replace(/<\S+\d{18,}>/i," "); //Remove mentions
     content = content.replace(/\bhttps?:\/\/\S+\b/i," "); //Remove links
 
     if (!content.match(/69/i)) { return; }
