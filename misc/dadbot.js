@@ -1,6 +1,9 @@
 const Jimp = require("jimp");
+const roleId = require("../options.json").dad_ignore_role;
 
 async function dad(msg) {
+    if (msg.member.roles.cache.has(roleId)) {return;}
+
     const dadmatch = msg.content.match(/^(i\W*m|i\s+am)\s+(.*)/i);
     if (!dadmatch) {return;}
     
