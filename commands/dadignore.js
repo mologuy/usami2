@@ -14,11 +14,11 @@ async function run(interaction) {
 
     if (interaction.member.roles.cache.has(roleId)) {
         await interaction.member.roles.remove(roleId);
-        await interaction.reply("Removed the ignore role!");
+        await interaction.reply("Dad will no longer ignore you!");
     }
     else {
         await interaction.member.roles.add(roleId);
-        await interaction.reply("Added the ignore role!");
+        await interaction.reply("Dad will ignore you now!");
     }
 }
 
