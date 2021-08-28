@@ -6,12 +6,12 @@ async function dad(msg) {
     
     const name = dadmatch[2];
 
-    const avatarURL = msg.author.avatarURL({size: 256, format: "png"});
+    const avatarURL = msg.author.avatarURL({size: 128, format: "png"});
     
     const avatarImg = await Jimp.read(avatarURL);
     const pipeImg = await Jimp.read("./bin/pipe.png");
 
-    avatarImg.cover(256,256).composite(pipeImg, 0, 0);
+    avatarImg.cover(128, 128).composite(pipeImg, 0, 0);
 
     const image64 = await avatarImg.getBase64Async(Jimp.MIME_PNG);
 
