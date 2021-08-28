@@ -22,7 +22,7 @@ async function dad(msg) {
     
     let output;
     if (name.match(/^\W*dad\W*$/i)){
-        output = `No you're not. You're ${msg.author.username}!`
+        output = `No, you're not. You're ${msg.author.username}!`
     }
     else {
         output = `Hi, ${name}! I'm dad.`;
