@@ -9,6 +9,11 @@ const client = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS, Disc
 var COMMANDS = new Map();
 var MISCS = [];
 
+/**
+ * 
+ * @param {Map} commandMap 
+ * @returns {Array}
+ */
 function getCommandsDataArray(commandMap) {
 	var output = [];
 	commandMap.forEach((value)=>{
