@@ -28,7 +28,7 @@ async function getDadHook(msg) {
     return webhook;
 }
 /**
- * 
+ * @function
  * @param {Message} msg 
  * @returns 
  */
