@@ -1,6 +1,7 @@
 const io = require("socket.io-client");
 const Discord = require("discord.js");
 const options = require("./options.json").minecraft;
+const mc_util = require("minecraft-server-util");
 
 /**
  * @type {URL}
@@ -26,6 +27,11 @@ let ioSocket;
  * @type {Discord.Client}
  */
 let discordClient;
+
+/**
+ * @type {mc_util.RCON}
+ */
+let rcon;
 
 /**
  * @param {{line: String, date: Date}} data 
@@ -59,6 +65,34 @@ async function onChat(data) {
 }
 
 /**
+ * @param {string} command 
+ * @returns {Promise<string>}
+ */
+function rconPromise(command) {
+    return new Promise((resolve, reject)=>{
+        rcon = new mc_util.RCON(options.server_hostname, {port: options.rcon_port, password: options.rcon_password});
+        
+        rcon.on("output", (output)=>{
+            rcon.close();
+            resolve(output);
+        });
+
+        rcon.on("error", (e)=>{
+            rcon.close();
+            reject(e);
+        })
+
+        rcon.connect()
+        .then(()=>{
+            rcon.run(command);
+        })
+        .catch((e)=>{
+            reject(e);
+        })
+    });
+}
+
+/**
  * @param {Discord.Client} client 
  */
 function main(client) {
@@ -86,4 +120,4 @@ function main(client) {
     //client.on("messageCreate", ()=>{});
 }
 
-module.exports = {start: main};
+module.exports = {start: main, rcon: rconPromise};

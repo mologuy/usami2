@@ -10,6 +10,8 @@
         "console_channel": null,
         "server_hostname": "localhost",
         "server_port": 25565,
-        "socket_io_port": 3001
+        "socket_io_port": 3001,
+        "rcon_port": 25575,
+        "rcon_password": "rconpassword"
     }
 }
