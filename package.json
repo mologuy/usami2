@@ -25,6 +25,7 @@
     "discord.js": "^13.0.1",
     "fs": "^0.0.1-security",
     "jimp": "^0.16.1",
+    "minecraft-server-util": "^3.6.0",
     "nodemon": "^2.0.12",
     "path": "^0.12.7",
     "pm2": "^5.1.0",
