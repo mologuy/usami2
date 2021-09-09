@@ -17,7 +17,7 @@ async function run(interaction) {
     if (!user) {
         user = interaction.user;
     }
-    const avatarurl = user.avatarURL();
+    const avatarurl = user.avatarURL({dynamic: true, size: 2048});
     interaction.reply(avatarurl);
 }
 
