@@ -18,7 +18,7 @@ async function run(interaction) {
         user = interaction.user;
     }
     const avatarurl = user.avatarURL({dynamic: true, size: 4096});
-    interaction.reply(avatarurl);
+    await interaction.reply(avatarurl);
 }
 
 module.exports = {data, run};

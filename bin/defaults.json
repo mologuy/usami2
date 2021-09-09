@@ -3,5 +3,13 @@
     "version": "2.0",
     "main_guild_id": "123456789",
     "options_filename": "options.json",
-    "dad_ignore_role": "123456789"
+    "dad_ignore_role": "123456789",
+    "enable_minecraft": true,
+    "minecraft": {
+        "chat_channel": null,
+        "console_channel": null,
+        "server_hostname": "localhost",
+        "server_port": 25565,
+        "socket_io_port": 3001
+    }
 }
