@@ -29,11 +29,6 @@ let ioSocket;
 let discordClient;
 
 /**
- * @type {mc_util.RCON}
- */
-let rcon;
-
-/**
  * @param {{line: String, date: Date}} data 
  */
 async function onConsole(data) {
@@ -70,7 +65,7 @@ async function onChat(data) {
  */
 function rconPromise(command) {
     return new Promise((resolve, reject)=>{
-        rcon = new mc_util.RCON(options.server_hostname, {port: options.rcon_port, password: options.rcon_password});
+        const rcon = new mc_util.RCON(options.server_hostname, {port: options.rcon_port, password: options.rcon_password});
         
         rcon.on("output", (output)=>{
             rcon.close();
