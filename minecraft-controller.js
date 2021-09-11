@@ -88,6 +88,32 @@ function rconPromise(command) {
 }
 
 /**
+ * @param {Discord.Message} msg 
+ */
+async function onMsgConsole(msg) {
+    if (msg.author.bot) {return;}
+    if (msg.channel.id != consoleChannel.id) {return;}
+    const output = await rconPromise(msg.content);
+    console.log(output);
+    if (output.match(/\S/)) {
+        msg.channel.send(`[RCON Output]: ${output}`);
+    }
+}
+
+/**
+ * @param {Discord.Message} msg 
+ */
+async function onMsgChat(msg) {
+    if (msg.author.bot) {return;}
+    if (msg.channel.id != chatChannel.id) {return;}
+
+    const content = msg.content.replace(/[^ -~]/g, "?").substr(0, 255);
+    const tellraw = [{text: "[Discord]", color: "light_purple", bold: true}, {text: ` <${msg.author.username}> ${content}`, color: "white", bold: false}]
+    const output = `tellraw @a ${JSON.stringify(tellraw)}`;
+    await rconPromise(output);
+}
+
+/**
  * @param {Discord.Client} client 
  */
 function main(client) {
@@ -104,12 +130,18 @@ function main(client) {
 
     if (consoleChannel) {
         ioSocket.on("console", onConsole);
+        if (options.rcon_password) {
+            client.on("messageCreate", onMsgConsole);
+        }
     }
 
     if (chatChannel) {
         ioSocket.on("chat", onChat);
         ioSocket.on("joined", onJoined);
         ioSocket.on("left", onLeft);
+        if (options.rcon_password) {
+            client.on("messageCreate", onMsgChat);
+        }
     }
 
     //client.on("messageCreate", ()=>{});
