@@ -28,7 +28,6 @@
     "minecraft-server-util": "^3.6.0",
     "nodemon": "^2.0.12",
     "path": "^0.12.7",
-    "pm2": "^5.1.0",
     "socket.io": "^4.2.0",
     "socket.io-client": "^4.2.0",
     "ws": "^8.2.2"

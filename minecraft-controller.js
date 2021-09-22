@@ -1,4 +1,5 @@
-const io = require("socket.io-client");
+const io_client = require("socket.io-client");
+const io_server = require("socket.io");
 const Discord = require("discord.js");
 const options = require("./options.json").minecraft;
 const mc_util = require("minecraft-server-util");
@@ -19,9 +20,14 @@ let consoleChannel;
 let chatChannel;
 
 /**
- * @type {io.Socket}
+ * @type {io_client.Socket}
  */
 let ioSocket;
+
+/**
+ * @type {io_server.Server}
+ */
+let ioServer;
 
 /**
  * @type {Discord.Client}
@@ -123,7 +129,7 @@ function main(client) {
     url.hostname = options.server_hostname;
     url.port = options.socket_io_port;
 
-    ioSocket = io(url.toString());
+    ioSocket = io_client(url.toString());
 
     consoleChannel = client.channels.cache.get(options.console_channel);
     chatChannel = client.channels.cache.get(options.chat_channel);
