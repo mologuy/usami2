@@ -1,13 +1,8 @@
-const io_client = require("socket.io-client");
+//const io_client = require("socket.io-client");
 const io_server = require("socket.io");
 const Discord = require("discord.js");
 const options = require("./options.json").minecraft;
 const mc_util = require("minecraft-server-util");
-
-/**
- * @type {URL}
- */
-let url;
 
 /**
  * @type {Discord.TextChannel}
@@ -20,19 +15,9 @@ let consoleChannel;
 let chatChannel;
 
 /**
- * @type {io_client.Socket}
- */
-let ioSocket;
-
-/**
  * @type {io_server.Server}
  */
 let ioServer;
-
-/**
- * @type {Discord.Client}
- */
-let discordClient;
 
 /**
  * @param {{line: String, date: Date}} data 
@@ -73,12 +58,12 @@ function rconPromise(command) {
     return new Promise((resolve, reject)=>{
         const rcon = new mc_util.RCON(options.server_hostname, {port: options.rcon_port, password: options.rcon_password});
         
-        rcon.on("output", (output)=>{
+        rcon.once("output", (output)=>{
             rcon.close();
             resolve(output);
         });
 
-        rcon.on("error", (e)=>{
+        rcon.once("error", (e)=>{
             rcon.close();
             reject(e);
         })
@@ -123,34 +108,34 @@ async function onMsgChat(msg) {
  * @param {Discord.Client} client 
  */
 function main(client) {
-    discordClient = client;
-
-    url = new URL("ws://localhost");
-    url.hostname = options.server_hostname;
-    url.port = options.socket_io_port;
-
-    ioSocket = io_client(url.toString());
 
     consoleChannel = client.channels.cache.get(options.console_channel);
     chatChannel = client.channels.cache.get(options.chat_channel);
 
-    if (consoleChannel) {
-        ioSocket.on("console", onConsole);
-        if (options.rcon_password) {
-            client.on("messageCreate", onMsgConsole);
-        }
-    }
+    if (consoleChannel || chatChannel) {
+        ioServer = new io_server.Server(options.socket_io_port);
+        ioServer.on("connection", (socket)=>{
 
-    if (chatChannel) {
-        ioSocket.on("chat", onChat);
-        ioSocket.on("joined", onJoined);
-        ioSocket.on("left", onLeft);
-        if (options.rcon_password) {
-            client.on("messageCreate", onMsgChat);
-        }
-    }
+            console.log("Socket connected: ", socket.id);
 
-    //client.on("messageCreate", ()=>{});
+            if (consoleChannel) {
+                socket.on("console", onConsole);
+                if (options.rcon_password) {
+                    client.on("messageCreate", onMsgConsole);
+                }
+            }
+        
+            if (chatChannel) {
+                socket.on("chat", onChat);
+                socket.on("joined", onJoined);
+                socket.on("left", onLeft);
+                if (options.rcon_password) {
+                    client.on("messageCreate", onMsgChat);
+                }
+            }
+        
+        });    
+    }
 }
 
 module.exports = {start: main, rcon: rconPromise};
