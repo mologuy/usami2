@@ -84,6 +84,7 @@ function rconPromise(command) {
 async function onMsgConsole(msg) {
     if (msg.author.bot) {return;}
     if (msg.channel.id != consoleChannel.id) {return;}
+
     const output = await rconPromise(msg.content);
     console.log(output);
     if (output.match(/\S/)) {
@@ -115,26 +116,26 @@ function main(client) {
     if (consoleChannel || chatChannel) {
         ioServer = new io_server.Server(options.socket_io_port);
         ioServer.on("connection", (socket)=>{
-
             console.log("Socket connected: ", socket.id);
-
             if (consoleChannel) {
                 socket.on("console", onConsole);
-                if (options.rcon_password) {
-                    client.on("messageCreate", onMsgConsole);
-                }
             }
         
             if (chatChannel) {
                 socket.on("chat", onChat);
                 socket.on("joined", onJoined);
                 socket.on("left", onLeft);
-                if (options.rcon_password) {
-                    client.on("messageCreate", onMsgChat);
-                }
             }
-        
-        });    
+        });
+    }
+    
+    if (options.rcon_password) {
+        if (consoleChannel) { 
+            client.on("messageCreate", onMsgConsole);
+        }
+        if (chatChannel) {
+            client.on("messageCreate", onMsgChat);
+        }
     }
 }
 
