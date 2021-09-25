@@ -18,7 +18,12 @@ async function run(interaction) {
         user = interaction.user;
     }
     const avatarurl = user.avatarURL({dynamic: true, size: 4096});
-    await interaction.reply(avatarurl);
+    if (avatarurl) {
+        await interaction.reply(avatarurl);
+    }
+    else {
+        await interaction.reply("Sorry. That user doesn't seem to have a profile picture.");
+    }
 }
 
 module.exports = {data, run};
