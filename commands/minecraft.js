@@ -40,54 +40,71 @@ const data = {
 
 /**
  * @param {Discord.CommandInteraction} interaction
+ * @returns {Promise<void>}
+ */
+async function statusSubCom(interaction) {
+    await interaction.deferReply();
+    const embed = await mc_controller.status();
+    await interaction.editReply({embeds: [embed]});
+    return;
+}
+
+/**
+ * @param {Discord.CommandInteraction} interaction
+ * @returns {Promise<void>}
+ */
+ async function whitelistSubCom(interaction) {
+    await interaction.deferReply();
+    const username = interaction.options.getString("mc_username").replace(/\W/,"");
+    const output = await mc_controller.rcon(`whitelist add ${username}`);
+    if (output) {
+        await interaction.editReply(output);
+    }
+    else {
+        await interaction.editReply(`An error occured. Invalid username?`);
+    }
+    return;
+}
+
+/**
+ * @param {Discord.CommandInteraction} interaction
+ * @returns {Promise<void>}
+ */
+ async function rconSubCom(interaction) {
+    if (interaction.member.roles.cache.has(options.minecraft_op_role)) {
+        await interaction.deferReply();
+        const command = interaction.options.getString("mc_command");
+        var output = await mc_controller.rcon(command);
+        if (!output) {
+            output = "";
+        }
+        await interaction.editReply(`Server response: \` ${output} \``);
+    }
+    else {
+        await interaction.reply("You don't have the appropriate role to use this command.");
+    }
+    return;
+}
+
+/**
+ * @param {Discord.CommandInteraction} interaction
  */
 async function run(interaction) {
-    try {
-        const subcommand = interaction.options.getSubcommand();
-        if (!subcommand || subcommand === "status") {
-            await interaction.deferReply();
-            const embed = await mc_controller.status();
-            await interaction.editReply({embeds: [embed]});
-            return;
-        }
-        if (subcommand === "whitelist") {
-            await interaction.deferReply();
-            const username = interaction.options.getString("mc_username");
-            const output = await mc_controller.rcon(`whitelist add ${username}`);
-            if (output) {
-                await interaction.editReply(output);
-            }
-            else {
-                await interaction.editReply(`An error occured. Invalid username?`);
-            }
-            return;
-        }
-        if (subcommand === "rcon") {
-            if (interaction.member.roles.cache.has(options.minecraft_op_role)) {
-                await interaction.deferReply();
-                const command = interaction.options.getString("mc_command");
-                var output = await mc_controller.rcon(command);
-                if (!output) {
-                    output = "";
-                }
-                await interaction.editReply(`Server response: \` ${output} \``);
-            }
-            else {
-                await interaction.reply("You don't have the appropriate role to use this command.");
-            }
-            return;
-        }
-        await interaction.reply("Unknown subcommand.");
-        return;
-    }
-    catch(e) {
-        console.log(e);
-        if (interaction.deferred) {
-            await interaction.editReply("An error ocurred.");
-        }
-        else {
-            await interaction.reply("An error ocurred.");
-        }
+    const subcommand = interaction.options.getSubcommand();
+    switch (subcommand) {
+        case undefined:
+        case "status":
+            await statusSubCom(interaction);
+            break;
+        case "whitelist":
+            await whitelistSubCom(interaction);
+            break;
+        case "rcon":
+            await rconSubCom(interaction);
+            break;
+        default:
+            await interaction.reply("Unknown subcommand.");
+            break;
     }
 }
 
