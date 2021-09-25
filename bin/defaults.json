@@ -12,6 +12,7 @@
         "server_port": 25565,
         "socket_io_port": 3001,
         "rcon_port": 25575,
-        "rcon_password": "rconpassword"
+        "rcon_password": "rconpassword",
+        "minecraft_op_role": "123456789"
     }
 }

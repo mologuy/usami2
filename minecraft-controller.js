@@ -79,6 +79,59 @@ function rconPromise(command) {
 }
 
 /**
+ * @returns {Promise<Discord.MessageEmbed>}
+ */
+async function getStatusEmbed() {
+    let response;
+    let error = false;
+    try {
+        response = await mc_util.status(options.server_hostname, {port: options.server_port});
+    }
+    catch (e) {
+        error = true;
+        response = {host: options.server_hostname, description: {descriptionText: "Unavailable"}, version: "N/A", onlinePlayers: 0, maxPlayers: 0};
+    }
+    let port = "";
+    if (options.server_port != 25565) {
+        port = `:${options.server_port}`;
+    }
+    const msgEmbed = new Discord.MessageEmbed()
+    .setColor('#228B22')
+    .setTitle('Minecraft server info')
+    .setThumbnail("https://static.mologuy.com/images/mc-server/minecraft_icon.png")
+    .addFields(
+        {
+            name:"URL",
+            value: `${response.host}${port}`
+        },
+        {
+            name: "Name",
+            value: response.description?.descriptionText
+        },
+        {
+            name: '\u200B',
+            value: '\u200B'
+        },
+        {
+            name:"Version",
+            value: response.version,
+            inline: true
+        },
+        {
+            name:"Status",
+            value: (error ? "Offline" : "Online"),
+            inline: true
+        },
+        {
+            name:"Players",
+            value: `${response.onlinePlayers}/${response.maxPlayers}`,
+            inline: true
+        }
+    )
+    return msgEmbed;
+}
+
+/**
  * @param {Discord.Message} msg 
  */
 async function onMsgConsole(msg) {
@@ -139,4 +192,4 @@ function main(client) {
     }
 }
 
-module.exports = {start: main, rcon: rconPromise};
+module.exports = {start: main, rcon: rconPromise, status: getStatusEmbed};
