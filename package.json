@@ -1,6 +1,6 @@
 {
   "name": "usami",
-  "version": "2.0.3",
+  "version": "2.1.0",
   "description": "Usami 2.0",
   "main": "app.js",
   "scripts": {
