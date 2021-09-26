@@ -24,10 +24,9 @@ client.once("ready", async ()=>{
 			COMMAND_DATA = COMMAND_DATA.filter((data) => data.name != 'minecraft');
 		}
 
-		//await client.guilds.cache.get(OPTIONS.main_guild_id).commands.set(COMMAND_DATA);
-		client.guilds.cache.forEach(async (guild)=>{
+		for (const [id, guild] of client.guilds.cache) {
 			await guild.commands.set(COMMAND_DATA);
-		});
+		}
 	}
 	catch(e) {
 		console.log(e);
