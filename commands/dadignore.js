@@ -5,7 +5,9 @@ const data = {
     description: "Toggles the ignore role for Dadbot"
 }
 
-
+/**
+ * @param {import("discord.js").Interaction} interaction 
+ */
 async function run(interaction) {
     if (!interaction.guild.roles.cache.has(roleId)) {
         await interaction.reply("The ignore role doesn't seem to exist...");

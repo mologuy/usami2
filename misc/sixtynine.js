@@ -1,3 +1,6 @@
+/** 
+ * @param {import("discord.js").Message} msg
+ */
 async function sixnine(msg) {
     var content = msg.content.replace(/<\S+\d{18}>/i," "); //Remove mentions
     content = content.replace(/\bhttps?:\/\/\S+\b/i," "); //Remove links

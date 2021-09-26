@@ -1,6 +1,16 @@
 const Jimp = require("jimp");
 const roleId = require("../options.json").dad_ignore_role;
 
+/**
+ * @typedef {import("discord.js").Webhook} Webhook
+ * @typedef {import("discord.js").Message} Message
+ */
+
+/**
+ * @function
+ * @param {Message} msg
+ * @returns {Promise<Webhook>}
+ */
 async function getDadHook(msg) {
     const avatarURL = msg.author.avatarURL({size: 128, format: "png"});
     
@@ -10,11 +20,18 @@ async function getDadHook(msg) {
     avatarImg.cover(128, 128).composite(pipeImg, 0, 0);
 
     const image64 = await avatarImg.getBase64Async(Jimp.MIME_PNG);
+    /**
+     * @type {Webhook}
+     */
     const webhook = await msg.channel.createWebhook(`${msg.author.username}'s dad`, {avatar: image64});
 
     return webhook;
 }
-
+/**
+ * @function
+ * @param {Message} msg 
+ * @returns 
+ */
 async function dad(msg) {
     if (msg.member.roles.cache.has(roleId)) {return;}
 
