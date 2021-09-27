@@ -114,7 +114,7 @@ async function getStatusEmbed() {
         },
         {
             name:"Version",
-            value: response.version,
+            value: `Java ${response.version}`,
             inline: true
         },
         {
