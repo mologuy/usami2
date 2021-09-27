@@ -129,7 +129,7 @@ async function getStatusEmbed() {
         },
         {
             name:"Join command",
-            value: "`/minecraft whitelist [minecraft_username]`"
+            value: "`/minecraft join [minecraft_username]`"
         }
     )
     return msgEmbed;

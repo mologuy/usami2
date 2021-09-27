@@ -15,7 +15,7 @@ const data = {
         required: false
     },{
         type: "SUB_COMMAND",
-        name: "whitelist",
+        name: "join",
         description: "Adds a MC player to the whitelist.",
         required: false,
         options: [{
@@ -96,7 +96,7 @@ async function run(interaction) {
         case "status":
             await statusSubCom(interaction);
             break;
-        case "whitelist":
+        case "join":
             await whitelistSubCom(interaction);
             break;
         case "rcon":
