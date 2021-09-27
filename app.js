@@ -17,15 +17,12 @@ client.once("ready", async ()=>{
 		console.log("Logged in as", client.user.tag);
 		client.user.setActivity(`Love, love!`);
 
-		if (OPTIONS.enable_minecraft) {
-			minecraft_conntroller.start(client);
-		}
-		else {
-			COMMAND_DATA = COMMAND_DATA.filter((data) => data.name != 'minecraft');
-		}
-
 		for (const [id, guild] of client.guilds.cache) {
 			await guild.commands.set(COMMAND_DATA);
+		}
+
+		if (OPTIONS.enable_minecraft) {
+			await minecraft_conntroller.start(client);
 		}
 	}
 	catch(e) {
@@ -99,5 +96,10 @@ async function loadMiscs() {
 (async function(){
 	await loadCommands();
 	await loadMiscs();
+
+	if (!OPTIONS.enable_minecraft) {
+		COMMAND_DATA = COMMAND_DATA.filter((data) => data.name != 'minecraft');
+	}
+
 	await client.login(OPTIONS.token);
 })();

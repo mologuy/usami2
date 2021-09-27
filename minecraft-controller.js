@@ -140,7 +140,7 @@ async function getStatusEmbed() {
  */
 async function onMsgConsole(msg) {
     if (msg.author.bot) {return;}
-    if (msg.channel.id != consoleChannel.id) {return;}
+    if (msg.channel.id != consoleChannel?.id) {return;}
 
     try {
         const output = await rconPromise(msg.content);
@@ -159,7 +159,7 @@ async function onMsgConsole(msg) {
  */
 async function onMsgChat(msg) {
     if (msg.author.bot) {return;}
-    if (msg.channel.id != chatChannel.id) {return;}
+    if (msg.channel.id != chatChannel?.id) {return;}
 
     try {
         const content = msg.content.replace(/[^ -~]/g, "?").substr(0, 255);
@@ -185,8 +185,8 @@ async function main(client) {
         serverURL.hostname = options.server_hostname;
         serverURL.port = options.socket_io_port;
         ioSocket = client_io(serverURL.toString());
-        ioSocket.on("connect",()=>{console.log("Socket connected")});
-        ioSocket.on("disconnect",()=>{console.log("Socket disconnected")});
+        ioSocket.on("connect",()=>{console.log("Socket connected");});
+        ioSocket.on("disconnect",()=>{console.log("Socket disconnected");});
 
         if (consoleChannel) {
             ioSocket.on("console", onConsole);
