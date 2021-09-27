@@ -1,5 +1,5 @@
-//const io_client = require("socket.io-client");
-const io_server = require("socket.io");
+const client_io = require("socket.io-client");
+//const server_io = require("socket.io");
 const Discord = require("discord.js");
 const options = require("./options.json").minecraft;
 const mc_util = require("minecraft-server-util");
@@ -15,9 +15,9 @@ let consoleChannel;
 let chatChannel;
 
 /**
- * @type {io_server.Server}
+ * @type {client_io.Socket}
  */
-let ioServer;
+let ioSocket;
 
 /**
  * @param {{line: String, date: Date}} data 
@@ -27,7 +27,7 @@ async function onConsole(data) {
 }
 
 /**
- * @param {{message: string, username: string, date: date}} data 
+ * @param {{message: string, username: string, date: Date}} data 
  */
 async function onChat(data) {
     const output = `[Minecraft Server] **<${data.username}>** ${data.message}`;
@@ -126,6 +126,10 @@ async function getStatusEmbed() {
             name:"Players",
             value: `${response.onlinePlayers}/${response.maxPlayers}`,
             inline: true
+        },
+        {
+            name:"Join command",
+            value: "`/minecraft whitelist [minecraft_username]`"
         }
     )
     return msgEmbed;
@@ -138,10 +142,15 @@ async function onMsgConsole(msg) {
     if (msg.author.bot) {return;}
     if (msg.channel.id != consoleChannel.id) {return;}
 
-    const output = await rconPromise(msg.content);
-    console.log(output);
-    if (output.match(/\S/)) {
-        msg.channel.send(`[RCON Output]: ${output}`);
+    try {
+        const output = await rconPromise(msg.content);
+        //console.log(output);
+        if (output.match(/\S/)) {
+            await msg.channel.send(`[RCON Output]: ${output}`);
+        }
+    }
+    catch(e) {
+        console.log(e);
     }
 }
 
@@ -152,34 +161,43 @@ async function onMsgChat(msg) {
     if (msg.author.bot) {return;}
     if (msg.channel.id != chatChannel.id) {return;}
 
-    const content = msg.content.replace(/[^ -~]/g, "?").substr(0, 255);
-    const tellraw = [{text: "[Discord]", color: "light_purple", bold: true}, {text: ` <${msg.author.username}> ${content}`, color: "white", bold: false}]
-    const output = `tellraw @a ${JSON.stringify(tellraw)}`;
-    await rconPromise(output);
+    try {
+        const content = msg.content.replace(/[^ -~]/g, "?").substr(0, 255);
+        const tellraw = [{text: "[Discord]", color: "light_purple", bold: true}, {text: ` <${msg.author.username}> ${content}`, color: "white", bold: false}]
+        const output = `tellraw @a ${JSON.stringify(tellraw)}`;
+        await rconPromise(output);
+    }
+    catch(e) {
+        console.log(e);
+    }
 }
 
 /**
  * @param {Discord.Client} client 
  */
-function main(client) {
+async function main(client) {
 
     consoleChannel = client.channels.cache.get(options.console_channel);
     chatChannel = client.channels.cache.get(options.chat_channel);
 
     if (consoleChannel || chatChannel) {
-        ioServer = new io_server.Server(options.socket_io_port);
-        ioServer.on("connection", (socket)=>{
-            console.log("Socket connected: ", socket.id);
-            if (consoleChannel) {
-                socket.on("console", onConsole);
-            }
-        
-            if (chatChannel) {
-                socket.on("chat", onChat);
-                socket.on("joined", onJoined);
-                socket.on("left", onLeft);
-            }
-        });
+        let serverURL = new URL("ws://localhost/");
+        serverURL.hostname = options.server_hostname;
+        serverURL.port = options.socket_io_port;
+        ioSocket = client_io(serverURL.toString());
+        ioSocket.on("connect",()=>{console.log("Socket connected")});
+        ioSocket.on("disconnect",()=>{console.log("Socket disconnected")});
+
+        if (consoleChannel) {
+            ioSocket.on("console", onConsole);
+        }
+
+        if (chatChannel) {
+            ioSocket.on("chat", onChat);
+            ioSocket.on("joined", onJoined);
+            ioSocket.on("left", onLeft);
+        }
+
     }
     
     if (options.rcon_password) {
@@ -190,6 +208,7 @@ function main(client) {
             client.on("messageCreate", onMsgChat);
         }
     }
+    return;
 }
 
 module.exports = {start: main, rcon: rconPromise, status: getStatusEmbed};
