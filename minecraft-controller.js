@@ -60,6 +60,7 @@ function rconPromise(command) {
         
         rcon.once("output", (output)=>{
             rcon.close();
+            consoleChannel?.send(`[RCON Output]: ${output}`);
             resolve(output);
         });
 
@@ -70,7 +71,10 @@ function rconPromise(command) {
 
         rcon.connect()
         .then(()=>{
-            rcon.run(command);
+            rcon.run(command)
+            .then(()=>{
+                consoleChannel?.send(`[RCON Command]: ${command}`);
+            });
         })
         .catch((e)=>{
             reject(e);
@@ -101,12 +105,12 @@ async function getStatusEmbed() {
     .setThumbnail("https://static.mologuy.com/images/mc-server/minecraft_icon.png")
     .addFields(
         {
-            name:"URL",
+            name: "Server Address",
             value: `${response.host}${port}`
         },
         {
-            name: "Name",
-            value: response.description?.descriptionText
+            name: "Server Name",
+            value: `\u200B${response.description?.descriptionText}`
         },
         {
             name: '\u200B',
@@ -143,11 +147,8 @@ async function onMsgConsole(msg) {
     if (msg.channel.id != consoleChannel?.id) {return;}
 
     try {
-        const output = await rconPromise(msg.content);
+        await rconPromise(msg.content);
         //console.log(output);
-        if (output.match(/\S/)) {
-            await msg.channel.send(`[RCON Output]: ${output}`);
-        }
     }
     catch(e) {
         console.log(e);
@@ -163,7 +164,7 @@ async function onMsgChat(msg) {
 
     try {
         const content = msg.content.replace(/[^ -~]/g, "?").substr(0, 255);
-        const tellraw = [{text: "[Discord]", color: "light_purple", bold: true}, {text: ` <${msg.author.username}> ${content}`, color: "white", bold: false}]
+        const tellraw = [{text: "[Discord]", color: "light_purple", bold: true}, {text: ` <${msg.author.username.replace(/[^ -~]/g, "?")}> ${content}`, color: "white", bold: false}]
         const output = `tellraw @a ${JSON.stringify(tellraw)}`;
         await rconPromise(output);
     }
