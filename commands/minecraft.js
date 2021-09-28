@@ -106,6 +106,7 @@ async function run(interaction) {
             await interaction.reply("Unknown subcommand.");
             break;
     }
+    return;
 }
 
 module.exports = {data, run}
