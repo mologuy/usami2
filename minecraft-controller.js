@@ -52,16 +52,34 @@ async function onChat(data) {
 }
 
 /**
+ * @param {{message: string}} data 
+ */
+async function onServerReady(data) {
+    if (data.message.match(/\S/g)) {
+        await consoleChannel?.send(data.message);
+    }
+    else {
+        await consoleChannel?.send("Server ready!");
+    }
+}
+
+/**
  * @param {string} command 
  * @returns {Promise<string>}
  */
 async function rconPromise(command) {
     const rcon = new Rcon({ host: options.server_hostname, port: options.rcon_port, password: options.rcon_password});
    
+    consoleChannel?.send(`[RCON command]: ${command}`)
+    .catch((e)=>{console.log(e)});
+
     await rcon.connect();
     const output = await rcon.send(command);
     rcon.end();
     
+    consoleChannel?.send(`[RCON output]: ${output}`)
+    .catch((e)=>{console.log(e)});
+
     return output;
 }
 
@@ -130,7 +148,9 @@ async function onMsgConsole(msg) {
     if (msg.channel.id != consoleChannel?.id) {return;}
 
     try {
-        await rconPromise(msg.content);
+        if (msg.member.roles.cache.has(options.minecraft_op_role)) {
+            await rconPromise(msg.content);
+        }
         //console.log(output);
     }
     catch(e) {
@@ -174,6 +194,7 @@ async function main(client) {
 
         if (consoleChannel) {
             ioSocket.on("console", onConsole);
+            ioSocket.on("serverReady", onServerReady);
         }
 
         if (chatChannel) {
