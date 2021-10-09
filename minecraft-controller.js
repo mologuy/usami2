@@ -30,7 +30,7 @@ async function onConsole(data) {
  * @param {{message: string, username: string, date: Date}} data 
  */
 async function onChat(data) {
-    const output = `[Minecraft Server] **<${data.username}>** ${data.message}`;
+    const output = `[Chat] **<${data.username}>** ${data.message}`;
     await chatChannel?.send(output);
 }
 
@@ -38,7 +38,7 @@ async function onChat(data) {
  * @param {{username: string, date: date}} data 
  */
  async function onJoined(data) {
-    const output = `[Minecraft Server] **${data.username}** joined the game`;
+    const output = `[Connection] **${data.username}** joined the game`;
     await chatChannel?.send(output);
 }
 
@@ -46,7 +46,7 @@ async function onChat(data) {
  * @param {{username: string, date: date}} data 
  */
  async function onLeft(data) {
-    const output = `[Minecraft Server] **${data.username}** left the game`;
+    const output = `[Connection] **${data.username}** left the game`;
     await chatChannel?.send(output);
 }
 
