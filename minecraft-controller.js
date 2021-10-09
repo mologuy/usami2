@@ -56,7 +56,8 @@ async function onChat(data) {
  * @returns {Promise<string>}
  */
 async function rconPromise(command) {
-    const rcon = new Rcon({ host: options.server_hostname, port: options.rcon_port, password: options.rcon_password });
+    const rcon = new Rcon({ host: options.server_hostname, port: options.rcon_port, password: options.rcon_password});
+   
     await rcon.connect();
     const output = await rcon.send(command);
     rcon.end();
@@ -145,8 +146,8 @@ async function onMsgChat(msg) {
     if (msg.channel.id != chatChannel?.id) {return;}
 
     try {
-        const content = msg.content.replace(/[^ -~]/g, "?").substr(0, 255);
-        const tellraw = [{text: "[Discord]", color: "light_purple", bold: true}, {text: ` <${msg.author.username.replace(/[^ -~]/g, "?")}> ${content}`, color: "white", bold: false}]
+        const content = msg.content.substr(0, 256);
+        const tellraw = [{text: "[Discord]", color: "light_purple", bold: true}, {text: ` <${msg.author.username}> ${content}`, color: "white", bold: false}]
         const output = `tellraw @a ${JSON.stringify(tellraw)}`;
         await rconPromise(output);
     }
