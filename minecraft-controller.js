@@ -3,6 +3,7 @@ const client_io = require("socket.io-client");
 const Discord = require("discord.js");
 const options = require("./options.json").minecraft;
 const mc_util = require("minecraft-server-util");
+const { Rcon } = require("rcon-client");
 
 /**
  * @type {Discord.TextChannel}
@@ -54,32 +55,13 @@ async function onChat(data) {
  * @param {string} command 
  * @returns {Promise<string>}
  */
-function rconPromise(command) {
-    return new Promise((resolve, reject)=>{
-        const rcon = new mc_util.RCON(options.server_hostname, {port: options.rcon_port, password: options.rcon_password});
-        
-        rcon.once("output", (output)=>{
-            rcon.close();
-            consoleChannel?.send(`[RCON Output]: ${output}`);
-            resolve(output);
-        });
-
-        rcon.once("error", (e)=>{
-            rcon.close();
-            reject(e);
-        })
-
-        rcon.connect()
-        .then(()=>{
-            rcon.run(command)
-            .then(()=>{
-                consoleChannel?.send(`[RCON Command]: ${command}`);
-            });
-        })
-        .catch((e)=>{
-            reject(e);
-        })
-    });
+async function rconPromise(command) {
+    const rcon = new Rcon({ host: options.server_hostname, port: options.rcon_port, password: options.rcon_password });
+    await rcon.connect();
+    const output = await rcon.send(command);
+    rcon.end();
+    
+    return output;
 }
 
 /**

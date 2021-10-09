@@ -2,6 +2,7 @@ import {rcon} from "./minecraft-controller.js"
 
 async function main() {
     const command = process.argv.splice(2)?.join(" ");
+    //const command = "say はい";
     if (command && command.match(/\S/g)) {
         const output = await rcon(command);
         console.log(output);
