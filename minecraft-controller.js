@@ -55,12 +55,37 @@ async function onChat(data) {
  * @param {{message: string}} data 
  */
 async function onServerReady(data) {
+    await chatChannel?.send("[Status] Server online!");
     if (data.message.match(/\S/g)) {
         await consoleChannel?.send(data.message);
     }
     else {
         await consoleChannel?.send("Server ready!");
     }
+}
+
+/**
+ * @param {{code: number}} data 
+ */
+async function onServerExit(data) {
+    chatChannel?.send(`[Status] Server offline.`);
+    consoleChannel?.send(`Server exited with status: ${data.code}`);
+}
+
+/**
+ * @param {{username: string, advancement: string}} data 
+ */
+async function onAdvancement(data) {
+    const output = `[Advancement] ${data.username} has made the advancement [${data.advancement}]`;
+    await chatChannel?.send(output);
+}
+
+/**
+ * @param {{message: string}} data 
+ */
+async function onDeath(data) {
+    const output = `[Death] ${data.message}`;
+    await chatChannel?.send(output);
 }
 
 /**
@@ -176,6 +201,16 @@ async function onMsgChat(msg) {
     }
 }
 
+async function onSocketConnect() {
+    console.log("socket connected");
+    await consoleChannel?.send("Socket connected");
+}
+
+async function onSocketDisconnect() {
+    console.log("socket disconnected");
+    await consoleChannel?.send("Socket disconnected");
+}
+
 /**
  * @param {Discord.Client} client 
  */
@@ -189,20 +224,22 @@ async function main(client) {
         serverURL.hostname = options.server_hostname;
         serverURL.port = options.socket_io_port;
         ioSocket = client_io(serverURL.toString());
-        ioSocket.on("connect",()=>{console.log("Socket connected");});
-        ioSocket.on("disconnect",()=>{console.log("Socket disconnected");});
+        ioSocket.on("connect", onSocketConnect);
+        ioSocket.on("disconnect", onSocketDisconnect);
+
+        ioSocket.on("serverReady", onServerReady);
+        ioSocket.on("serverExit", onServerExit);
 
         if (consoleChannel) {
             ioSocket.on("console", onConsole);
-            ioSocket.on("serverReady", onServerReady);
         }
 
         if (chatChannel) {
             ioSocket.on("chat", onChat);
             ioSocket.on("joined", onJoined);
             ioSocket.on("left", onLeft);
-            ioSocket.on("advancement", null);
-            ioSocket.on("death", null);
+            ioSocket.on("advancement", onAdvancement);
+            ioSocket.on("death", onDeath);
         }
 
     }
