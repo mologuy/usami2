@@ -201,6 +201,8 @@ async function main(client) {
             ioSocket.on("chat", onChat);
             ioSocket.on("joined", onJoined);
             ioSocket.on("left", onLeft);
+            ioSocket.on("advancement", null);
+            ioSocket.on("death", null);
         }
 
     }

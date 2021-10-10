@@ -103,7 +103,7 @@ async function run(interaction) {
             await rconSubCom(interaction);
             break;
         default:
-            await interaction.reply("Unknown subcommand.");
+            await interaction.reply(`Unknown subcommand: ${subcommand}`);
             break;
     }
     return;
