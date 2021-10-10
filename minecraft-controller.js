@@ -55,7 +55,7 @@ async function onChat(data) {
  * @param {{message: string}} data 
  */
 async function onServerReady(data) {
-    await chatChannel?.send("[Status] Server online!");
+    //await chatChannel?.send("[Status] Server online!");
     if (data.message.match(/\S/g)) {
         await consoleChannel?.send(data.message);
     }
@@ -68,23 +68,33 @@ async function onServerReady(data) {
  * @param {{code: number}} data 
  */
 async function onServerExit(data) {
-    chatChannel?.send(`[Status] Server offline.`);
-    consoleChannel?.send(`Server exited with status: ${data.code}`);
+    //chatChannel?.send(`[Status] Server offline.`);
+    await consoleChannel?.send(`Server exited with status: ${data.code}`);
 }
 
 /**
  * @param {{username: string, advancement: string}} data 
  */
 async function onAdvancement(data) {
-    const output = `[Advancement] ${data.username} has made the advancement [${data.advancement}]`;
+    const output = `[Advancement] **${data.username}** has made the advancement [${data.advancement}]`;
     await chatChannel?.send(output);
 }
 
 /**
- * @param {{message: string}} data 
+ * @param {{username: string, reason: string}} data 
  */
 async function onDeath(data) {
-    const output = `[Death] ${data.message}`;
+    let username = "";
+    if (data.username?.match(/\S/)) {
+        username = ` **${data.username}**`;
+    }
+
+    let reason = ""
+    if (data.reason.match(/\S/)) {
+        reason = ` ${data.reason}`;
+    }
+
+    const output = `[Death]${username}${reason}`;
     await chatChannel?.send(output);
 }
 

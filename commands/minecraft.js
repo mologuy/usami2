@@ -35,6 +35,11 @@ const data = {
             description: "Command to execute.",
             required: true
         }]
+    },{
+        type: "SUB_COMMAND",
+        name: "list",
+        description: "Shows the list of all the players connected to the server",
+        required: false
     }]
 };
 
@@ -87,6 +92,23 @@ async function statusSubCom(interaction) {
 }
 
 /**
+ * @param {Discord.CommandInteraction} interaction 
+ * @returns {Promise<void>}
+ */
+async function listSubCom(interaction) {
+    await interaction.deferReply();
+    const output = await mc_controller.rcon("list");
+    if (output.match(/\S/)) {
+        await interaction.editReply(output);
+    }
+    else {
+        await interaction.editReply("The server sent an empty response...");
+    }
+
+    return
+}
+
+/**
  * @param {Discord.CommandInteraction} interaction
  */
 async function run(interaction) {
@@ -101,6 +123,9 @@ async function run(interaction) {
             break;
         case "rcon":
             await rconSubCom(interaction);
+            break;
+        case "list":
+            await listSubCom(interaction);
             break;
         default:
             await interaction.reply(`Unknown subcommand: ${subcommand}`);
