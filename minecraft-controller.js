@@ -3,6 +3,7 @@ const client_io = require("socket.io-client");
 const Discord = require("discord.js");
 const options = require("./options.json").minecraft;
 const mc_util = require("minecraft-server-util");
+const { Rcon } = require("rcon-client");
 
 /**
  * @type {Discord.TextChannel}
@@ -30,7 +31,7 @@ async function onConsole(data) {
  * @param {{message: string, username: string, date: Date}} data 
  */
 async function onChat(data) {
-    const output = `[Minecraft Server] **<${data.username}>** ${data.message}`;
+    const output = `[Chat] **<${data.username}>** ${data.message}`;
     await chatChannel?.send(output);
 }
 
@@ -38,7 +39,7 @@ async function onChat(data) {
  * @param {{username: string, date: date}} data 
  */
  async function onJoined(data) {
-    const output = `[Minecraft Server] **${data.username}** joined the game`;
+    const output = `[Connection] **${data.username}** joined the game`;
     await chatChannel?.send(output);
 }
 
@@ -46,7 +47,54 @@ async function onChat(data) {
  * @param {{username: string, date: date}} data 
  */
  async function onLeft(data) {
-    const output = `[Minecraft Server] **${data.username}** left the game`;
+    const output = `[Connection] **${data.username}** left the game`;
+    await chatChannel?.send(output);
+}
+
+/**
+ * @param {{message: string}} data 
+ */
+async function onServerReady(data) {
+    //await chatChannel?.send("[Status] Server online!");
+    if (data.message.match(/\S/g)) {
+        await consoleChannel?.send(data.message);
+    }
+    else {
+        await consoleChannel?.send("Server ready!");
+    }
+}
+
+/**
+ * @param {{code: number}} data 
+ */
+async function onServerExit(data) {
+    //chatChannel?.send(`[Status] Server offline.`);
+    await consoleChannel?.send(`Server exited with status: ${data.code}`);
+}
+
+/**
+ * @param {{username: string, advancement: string}} data 
+ */
+async function onAdvancement(data) {
+    const output = `[Advancement] **${data.username}** has made the advancement [${data.advancement}]`;
+    await chatChannel?.send(output);
+}
+
+/**
+ * @param {{username: string, reason: string}} data 
+ */
+async function onDeath(data) {
+    let username = "";
+    if (data.username?.match(/\S/)) {
+        username = ` **${data.username}**`;
+    }
+
+    let reason = ""
+    if (data.reason.match(/\S/)) {
+        reason = ` ${data.reason}`;
+    }
+
+    const output = `[Death]${username}${reason}`;
     await chatChannel?.send(output);
 }
 
@@ -54,32 +102,20 @@ async function onChat(data) {
  * @param {string} command 
  * @returns {Promise<string>}
  */
-function rconPromise(command) {
-    return new Promise((resolve, reject)=>{
-        const rcon = new mc_util.RCON(options.server_hostname, {port: options.rcon_port, password: options.rcon_password});
-        
-        rcon.once("output", (output)=>{
-            rcon.close();
-            consoleChannel?.send(`[RCON Output]: ${output}`);
-            resolve(output);
-        });
+async function rconPromise(command) {
+    const rcon = new Rcon({ host: options.server_hostname, port: options.rcon_port, password: options.rcon_password});
+   
+    consoleChannel?.send(`[RCON command]: ${command}`)
+    .catch((e)=>{console.log(e)});
 
-        rcon.once("error", (e)=>{
-            rcon.close();
-            reject(e);
-        })
+    await rcon.connect();
+    const output = await rcon.send(command);
+    rcon.end();
+    
+    consoleChannel?.send(`[RCON output]: ${output}`)
+    .catch((e)=>{console.log(e)});
 
-        rcon.connect()
-        .then(()=>{
-            rcon.run(command)
-            .then(()=>{
-                consoleChannel?.send(`[RCON Command]: ${command}`);
-            });
-        })
-        .catch((e)=>{
-            reject(e);
-        })
-    });
+    return output;
 }
 
 /**
@@ -147,7 +183,9 @@ async function onMsgConsole(msg) {
     if (msg.channel.id != consoleChannel?.id) {return;}
 
     try {
-        await rconPromise(msg.content);
+        if (msg.member.roles.cache.has(options.minecraft_op_role)) {
+            await rconPromise(msg.content);
+        }
         //console.log(output);
     }
     catch(e) {
@@ -163,14 +201,24 @@ async function onMsgChat(msg) {
     if (msg.channel.id != chatChannel?.id) {return;}
 
     try {
-        const content = msg.content.replace(/[^ -~]/g, "?").substr(0, 255);
-        const tellraw = [{text: "[Discord]", color: "light_purple", bold: true}, {text: ` <${msg.author.username.replace(/[^ -~]/g, "?")}> ${content}`, color: "white", bold: false}]
+        const content = msg.content.substr(0, 256);
+        const tellraw = [{text: "[Discord]", color: "light_purple", bold: true}, {text: ` <${msg.author.username}> ${content}`, color: "white", bold: false}]
         const output = `tellraw @a ${JSON.stringify(tellraw)}`;
         await rconPromise(output);
     }
     catch(e) {
         console.log(e);
     }
+}
+
+async function onSocketConnect() {
+    console.log("socket connected");
+    await consoleChannel?.send("Socket connected");
+}
+
+async function onSocketDisconnect() {
+    console.log("socket disconnected");
+    await consoleChannel?.send("Socket disconnected");
 }
 
 /**
@@ -186,8 +234,11 @@ async function main(client) {
         serverURL.hostname = options.server_hostname;
         serverURL.port = options.socket_io_port;
         ioSocket = client_io(serverURL.toString());
-        ioSocket.on("connect",()=>{console.log("Socket connected");});
-        ioSocket.on("disconnect",()=>{console.log("Socket disconnected");});
+        ioSocket.on("connect", onSocketConnect);
+        ioSocket.on("disconnect", onSocketDisconnect);
+
+        ioSocket.on("serverReady", onServerReady);
+        ioSocket.on("serverExit", onServerExit);
 
         if (consoleChannel) {
             ioSocket.on("console", onConsole);
@@ -197,6 +248,8 @@ async function main(client) {
             ioSocket.on("chat", onChat);
             ioSocket.on("joined", onJoined);
             ioSocket.on("left", onLeft);
+            ioSocket.on("advancement", onAdvancement);
+            ioSocket.on("death", onDeath);
         }
 
     }
