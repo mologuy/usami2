@@ -76,7 +76,7 @@ async function onServerExit(data) {
  * @param {{username: string, advancement: string}} data 
  */
 async function onAdvancement(data) {
-    const output = `[Advancement] **${data.username}** has made the advancement [${data.advancement}]`;
+    const output = `[Advancement] **${data.username}** has earned the achievement [${data.advancement}]`;
     await chatChannel?.send(output);
 }
 
